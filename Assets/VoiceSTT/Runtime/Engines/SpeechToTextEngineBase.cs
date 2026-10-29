@@ -79,6 +79,12 @@ namespace VoxelMagic.Voice
             unavailableReason = isAvailable ? "" : (reason ?? "");
         }
 
+        public void SetPreferredDevice(string deviceName)
+        {
+            if (disposed) return;
+            OnPreferredDeviceChanged(deviceName ?? "");
+        }
+
         public void StartListening(string deviceName)
         {
             ThrowIfDisposed();
@@ -180,6 +186,7 @@ namespace VoxelMagic.Voice
         /// <summary>녹음을 멈추고 텍스트를 얻는다. 시간 제한·취소는 기반 클래스가 처리한다.</summary>
         protected abstract Task<EngineTranscription> OnStopAndTranscribeAsync();
 
+        protected virtual void OnPreferredDeviceChanged(string deviceName) { }
         protected virtual void OnCancel() { }
         protected virtual void OnTick() { }
         protected virtual void OnDispose() { }

@@ -43,7 +43,7 @@ namespace VoxelMagic.Voice
         public override string EngineName => "WindowsDictation";
         public override string ModelName => "Windows Speech (OS)";
         public override bool SupportsDeviceSelection => false;
-        public override float InputLevel => recorder != null && recorder.IsRecording ? recorder.Level : -1f;
+        public override float InputLevel => recorder != null && recorder.IsCapturing ? recorder.Level : -1f;
 
         protected override string DescribeDevice(string requested)
         {

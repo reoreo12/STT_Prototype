@@ -75,7 +75,10 @@ namespace VoxelMagic.Voice
                         settings.WhisperUseInitialPrompt ? string.Join(", ", settings.TargetPhrases) : "",
                         settings.MinSpeechLevel,
                         settings.MinAudioSeconds,
-                        new MicrophoneRecorder(settings.MaxRecordSeconds));
+                        settings.KeepMicrophoneOpen,
+                        settings.PreRollSeconds,
+                        settings.PostRollSeconds,
+                        new MicrophoneRecorder(settings.MaxRecordSeconds + settings.PreRollSeconds + settings.PostRollSeconds));
 #endif
 
                 default:

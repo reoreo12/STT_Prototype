@@ -19,10 +19,13 @@ MonoBehaviour:
   - ggml-base
   whisperModelFolder: VoiceSTT
   whisperUseGpu: 0
-  whisperUseInitialPrompt: 0
+  whisperUseInitialPrompt: 1
   language: ko
   pushToTalkKey: 1
   preferredMicDevice: 
+  keepMicrophoneOpen: 1
+  preRollSeconds: 0.3
+  postRollSeconds: 0.3
   maxRecordSeconds: 10
   transcribeTimeoutSeconds: 8
   dictationFinalResultWaitMs: 1500

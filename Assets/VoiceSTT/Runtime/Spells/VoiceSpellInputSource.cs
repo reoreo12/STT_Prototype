@@ -49,6 +49,7 @@ namespace VoxelMagic.Voice
         public void SetMicDevice(string deviceName)
         {
             micDevice = deviceName ?? "";
+            engine.SetPreferredDevice(micDevice);
         }
 
         /// <summary>엔진을 바꾼다. 녹음·변환 중이면 false.</summary>
@@ -96,6 +97,7 @@ namespace VoxelMagic.Voice
         {
             engine = target;
             engine.Completed += OnEngineCompleted;
+            engine.SetPreferredDevice(micDevice);
             lastAvailability = engine.IsAvailable;
             AvailabilityChanged?.Invoke(lastAvailability);
         }

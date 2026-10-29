@@ -388,3 +388,27 @@ STTTest
 - **엔진 선택 단위**: 종류(enum)만 두고 모델은 설정에서 바꾸는 방법과, (종류 + 모델)을 드롭다운 항목으로 두는 방법이 있었다. tiny와 base를 플레이 중에 바로 바꿔 비교해야 하므로 후자를 골랐다.
 - **WhisperManager(MonoBehaviour)와 WhisperWrapper(일반 클래스)**: 우리 설계(엔진은 일반 C# 클래스)에 맞는 `WhisperWrapper`를 쓴다.
 - **초기 프롬프트**: 주문 목록을 프롬프트로 주면 인식이 그쪽으로 기운다. 원래 성능을 재기 위해 기본은 끄고, 설정에서 켜서 비교할 수 있게 한다.
+
+---
+
+## 13. 녹음 지연 개선과 초기 프롬프트 — 2026-10-29
+
+첫 마이크 테스트(CHANGELOG 참고)에서 **키를 누른 뒤 실제 소리가 들어오기까지 0.4~1.4초**가 걸려 첫 음절이 잘렸다. 같은 녹음으로 다시 시험했을 때 초기 프롬프트가 효과가 컸다. 사용자 승인을 받아 아래와 같이 바꾼다.
+
+### 변경 내용
+
+| 대상 | 변경 |
+|---|---|
+| `MicrophoneRecorder` | **상시 녹음(링 버퍼)** 방식 추가. `Open(device)`로 반복(loop) 녹음을 켜 두고, `BeginCapture(preRoll)`가 **누르기 직전 preRoll초**부터 잘라 쓰기 시작하며, `EndCapture()`가 그 구간의 샘플을 돌려준다. 실제 소리(0이 아닌 샘플)가 들어오기 시작하면 `IsLive=true`. 기존 `Start/Stop`은 Open+BeginCapture / EndCapture+Close로 유지한다 (엔진 A가 사용) |
+| `WhisperStt` | 엔진을 만들거나 장치가 바뀌면 마이크를 미리 연다(`keepMicrophoneOpen`). 누르면 즉시 캡처를 시작하고, 떼면 **postRoll초 더 기다린 뒤** 캡처를 끝내고 변환한다. 기다리는 시간은 `Tick()`에서 검사한다(기존 방식과 같음) |
+| `ISpeechToText` | `SetPreferredDevice(device)` 추가. 기반 클래스에서는 아무 일도 하지 않는 기본 구현이고(`OnPreferredDeviceChanged`), `WhisperStt`만 이 시점에 마이크를 연다. `VoiceSpellInputSource`가 엔진을 연결할 때와 장치를 바꿀 때 호출한다 |
+| `SttSettings` | `keepMicrophoneOpen`(기본 true), `preRollSeconds`(0.3), `postRollSeconds`(0.3) 추가. `whisperUseInitialPrompt` 기본값을 **true**로 변경 |
+
+### 측정값의 의미 변화
+- `engineStartMs`: 마이크가 이미 켜져 있으면 0에 가깝다.
+- `transcribeMs`: 뗀 순간부터 결과까지이므로 **postRoll(0.3초)이 포함된다.** 플레이어가 실제로 기다리는 시간이기 때문이다.
+- `audioSec`: preRoll과 postRoll을 포함한 실제 녹음 길이.
+
+### 선택지와 이유
+- **상시 녹음과 누를 때 시작**: 누를 때 마이크를 켜면 장치가 준비되는 시간(이 PC에서 0.4~1.4초)을 피할 수 없다. 상시 녹음은 지연이 사라지는 대신, 플레이 중 Windows 마이크 사용 표시가 계속 켜져 있다. 게임에서는 **음성 모드를 고른 동안에만** 열어 두면 된다 (`keepMicrophoneOpen`으로 끌 수 있음).
+- **엔진 A는 그대로**: 받아쓰기는 Windows가 직접 마이크를 관리하므로 상시 녹음을 쓰지 않는다. 보조 녹음기도 기존처럼 누를 때 켠다.

@@ -35,6 +35,9 @@ namespace VoxelMagic.Voice
         event Action<string> HypothesisReceived;
         event Action<SttResult> Completed;
 
+        /// <summary>앞으로 쓸 마이크 장치를 알린다. 마이크를 미리 열어 두는 엔진은 이때 연다.</summary>
+        void SetPreferredDevice(string deviceName);
+
         void StartListening(string deviceName);
         Task<SttResult> StopAndTranscribeAsync();
         void Cancel();

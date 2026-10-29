@@ -4,8 +4,10 @@ using UnityEngine;
 namespace VoxelMagic.Voice
 {
     /// <summary>
-    /// Unity Microphone으로 녹음하고 입력 음량을 계산한다.
-    /// 엔진이 상속 대신 이 객체를 가지고 쓴다(조합).
+    /// Unity Microphone으로 녹음하고 입력 음량을 계산한다. 엔진이 상속 대신 이 객체를 가지고 쓴다(조합).
+    /// 반복(loop) 녹음을 링 버퍼처럼 켜 두고(Open), 필요한 구간만 잘라 쓴다(BeginCapture/EndCapture).
+    /// 마이크를 미리 열어 두면 누르는 순간의 시작 지연이 없고, 누르기 직전(preRoll)부터 잘라 쓸 수 있다.
+    /// Tick()은 매 프레임 호출해야 한다 (위치 추적, 음량 계산).
     /// </summary>
     public sealed class MicrophoneRecorder : IDisposable
     {
@@ -16,100 +18,162 @@ namespace VoxelMagic.Voice
         private readonly float[] levelBuffer = new float[LevelWindow];
         private AudioClip clip;
         private string device;
+        private int lastPosition;
+        private long writtenFrames;
+        private long captureStartFrame;
 
-        public MicrophoneRecorder(float maxRecordSeconds)
+        /// <param name="maxCaptureSeconds">한 번에 잘라 쓸 수 있는 최대 길이(녹음 + preRoll + postRoll).</param>
+        public MicrophoneRecorder(float maxCaptureSeconds)
         {
-            clipSeconds = Mathf.CeilToInt(maxRecordSeconds) + 1;
+            clipSeconds = Mathf.CeilToInt(maxCaptureSeconds) + 2;
         }
 
-        public bool IsRecording { get; private set; }
+        public bool IsOpen => clip != null;
+        public bool IsCapturing { get; private set; }
+
+        /// <summary>실제 소리(0이 아닌 샘플)가 들어오기 시작했는지. 장치가 막 열렸을 때는 한동안 0만 들어온다.</summary>
+        public bool IsLive { get; private set; }
 
         /// <summary>최근 입력 음량 0~1 (AudioLevel 기준).</summary>
         public float Level { get; private set; }
 
+        public string Device => device ?? "";
         public string LastError { get; private set; } = "";
 
-        /// <summary>지금까지 녹음된 프레임 수. 0보다 크면 실제로 녹음이 시작된 것이다.</summary>
-        public int RecordedFrames => IsRecording ? Microphone.GetPosition(device) : 0;
-
-        public bool Start(string deviceName)
+        /// <summary>반복 녹음을 켠다. 같은 장치가 이미 열려 있으면 그대로 둔다.</summary>
+        public bool Open(string deviceName)
         {
-            Discard();
-            LastError = "";
-            Level = 0f;
+            string wanted = string.IsNullOrEmpty(deviceName) ? null : deviceName;
+            if (clip != null && wanted == device && Microphone.IsRecording(device)) return true;
 
+            Close();
+            LastError = "";
             if (Microphone.devices.Length == 0)
             {
                 LastError = "연결된 마이크가 없습니다.";
                 return false;
             }
 
-            device = string.IsNullOrEmpty(deviceName) ? null : deviceName;
-            Microphone.GetDeviceCaps(device, out int minRate, out int maxRate);
+            Microphone.GetDeviceCaps(wanted, out int minRate, out int maxRate);
             int rate = minRate == 0 && maxRate == 0 ? PreferredSampleRate : Mathf.Clamp(PreferredSampleRate, minRate, maxRate);
+            clip = Microphone.Start(wanted, true, clipSeconds, rate);
+            if (clip == null)
+            {
+                LastError = "Microphone.Start 실패";
+                return false;
+            }
 
-            clip = Microphone.Start(device, false, clipSeconds, rate);
-            IsRecording = clip != null;
-            if (!IsRecording) LastError = "Microphone.Start 실패";
-            return IsRecording;
+            device = wanted;
+            lastPosition = 0;
+            writtenFrames = 0;
+            return true;
+        }
+
+        public void Close()
+        {
+            IsCapturing = false;
+            IsLive = false;
+            Level = 0f;
+            if (clip == null) return;
+            Microphone.End(device);
+            DestroyClip();
+        }
+
+        /// <summary>지금부터 캡처를 시작한다. 이미 녹음된 것 중 preRollSeconds만큼을 앞에 포함한다.</summary>
+        public bool BeginCapture(double preRollSeconds)
+        {
+            if (clip == null) return false;
+            UpdatePosition();
+            long preRoll = Math.Min(writtenFrames, (long)(Math.Max(0, preRollSeconds) * clip.frequency));
+            captureStartFrame = writtenFrames - preRoll;
+            IsCapturing = true;
+            Level = 0f;
+            return true;
+        }
+
+        /// <summary>캡처를 끝내고 캡처 구간의 샘플을 돌려준다. 마이크는 열린 채로 둔다. 캡처 중이 아니면 null.</summary>
+        public AudioSamples EndCapture()
+        {
+            if (!IsCapturing || clip == null)
+            {
+                IsCapturing = false;
+                return null;
+            }
+
+            UpdatePosition();
+            IsCapturing = false;
+            Level = 0f;
+
+            long frames = Math.Min(writtenFrames - captureStartFrame, clip.samples);
+            if (frames <= 0) return null;
+            return new AudioSamples(ReadRing(lastPosition - (int)frames, (int)frames), clip.frequency, clip.channels);
+        }
+
+        /// <summary>한 번만 녹음할 때: 열고 바로 캡처를 시작한다.</summary>
+        public bool Start(string deviceName)
+        {
+            return Open(deviceName) && BeginCapture(0);
+        }
+
+        /// <summary>한 번만 녹음할 때: 캡처를 끝내고 마이크를 닫는다.</summary>
+        public AudioSamples Stop()
+        {
+            AudioSamples audio = EndCapture();
+            Close();
+            return audio;
         }
 
         public void Tick()
         {
-            if (!IsRecording || clip == null) return;
+            if (clip == null) return;
+            UpdatePosition();
 
             int frames = LevelWindow / clip.channels;
-            int start = Microphone.GetPosition(device) - frames;
-            if (start < 0)
-            {
-                Level = 0f;
-                return;
-            }
+            if (writtenFrames < frames) return;
 
-            clip.GetData(levelBuffer, start);
+            float[] window = ReadRing(lastPosition - frames, frames);
             double sum = 0;
-            for (int i = 0; i < levelBuffer.Length; i++) sum += levelBuffer[i] * levelBuffer[i];
-            Level = AudioLevel.FromRms(Math.Sqrt(sum / levelBuffer.Length));
-        }
-
-        /// <summary>녹음을 멈추고 녹음된 부분만 돌려준다. 녹음 중이 아니면 null.</summary>
-        public AudioSamples Stop()
-        {
-            if (!IsRecording || clip == null)
+            for (int i = 0; i < window.Length; i++)
             {
-                Discard();
-                return null;
+                sum += window[i] * window[i];
+                if (!IsLive && window[i] != 0f) IsLive = true;
             }
-
-            bool reachedEnd = !Microphone.IsRecording(device);
-            int frames = reachedEnd ? clip.samples : Microphone.GetPosition(device);
-            Microphone.End(device);
-            IsRecording = false;
-            Level = 0f;
-
-            AudioSamples result = null;
-            if (frames > 0)
-            {
-                var data = new float[frames * clip.channels];
-                clip.GetData(data, 0);
-                result = new AudioSamples(data, clip.frequency, clip.channels);
-            }
-
-            DestroyClip();
-            return result;
+            Level = IsCapturing ? AudioLevel.FromRms(Math.Sqrt(sum / window.Length)) : 0f;
         }
 
         public void Dispose()
         {
-            Discard();
+            Close();
         }
 
-        private void Discard()
+        private void UpdatePosition()
         {
-            if (IsRecording) Microphone.End(device);
-            IsRecording = false;
-            Level = 0f;
-            DestroyClip();
+            int position = Microphone.GetPosition(device);
+            int delta = position - lastPosition;
+            if (delta < 0) delta += clip.samples;
+            writtenFrames += delta;
+            lastPosition = position;
+        }
+
+        /// <summary>링 버퍼에서 start(음수 가능)부터 frames 프레임을 읽는다. 끝을 넘으면 처음부터 이어 읽는다.</summary>
+        private float[] ReadRing(int start, int frames)
+        {
+            int length = clip.samples;
+            int channels = clip.channels;
+            start = ((start % length) + length) % length;
+
+            var result = new float[frames * channels];
+            int first = Math.Min(frames, length - start);
+            var head = first == frames ? result : new float[first * channels];
+            clip.GetData(head, start);
+            if (first < frames)
+            {
+                Array.Copy(head, result, head.Length);
+                var tail = new float[(frames - first) * channels];
+                clip.GetData(tail, 0);
+                Array.Copy(tail, 0, result, head.Length, tail.Length);
+            }
+            return result;
         }
 
         private void DestroyClip()
