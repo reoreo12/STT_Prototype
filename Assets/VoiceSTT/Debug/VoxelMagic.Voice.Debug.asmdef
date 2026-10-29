@@ -1,0 +1,18 @@
+{
+    "name": "VoxelMagic.Voice.Debug",
+    "rootNamespace": "VoxelMagic.Voice.Debug",
+    "references": [
+        "VoxelMagic.Voice",
+        "Unity.InputSystem",
+        "UnityEngine.UI"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

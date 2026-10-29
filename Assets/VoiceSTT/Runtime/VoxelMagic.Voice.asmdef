@@ -1,0 +1,24 @@
+{
+    "name": "VoxelMagic.Voice",
+    "rootNamespace": "VoxelMagic.Voice",
+    "references": [
+        "Unity.InputSystem",
+        "UnityEngine.UI",
+        "com.whisper.unity"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.whisper.unity",
+            "expression": "1.4.0",
+            "define": "VOICESTT_WHISPER"
+        }
+    ],
+    "noEngineReferences": false
+}

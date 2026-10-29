@@ -1,0 +1,25 @@
+{
+    "name": "VoxelMagic.Voice.Tests",
+    "rootNamespace": "VoxelMagic.Voice.Tests",
+    "references": [
+        "VoxelMagic.Voice",
+        "VoxelMagic.Voice.Debug",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

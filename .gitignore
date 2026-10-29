@@ -73,3 +73,7 @@ crashlytics-build.properties
 # Temporary auto-generated Android Assets
 /[Aa]ssets/[Ss]treamingAssets/aa.meta
 /[Aa]ssets/[Ss]treamingAssets/aa/*
+
+# VoiceSTT: Whisper 모델 파일은 용량이 커서 git에서 제외 (받는 방법은 Assets/VoiceSTT/SETUP.md 참고)
+/[Aa]ssets/[Ss]treaming[Aa]ssets/VoiceSTT/*.bin
+/[Aa]ssets/[Ss]treaming[Aa]ssets/VoiceSTT/*.bin.meta
