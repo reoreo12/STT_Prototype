@@ -25,7 +25,8 @@ namespace VoxelMagic.Voice
             foreach (string model in settings.WhisperModels)
             {
                 if (string.IsNullOrWhiteSpace(model)) continue;
-                options.Add(new SttEngineOption(SttEngineType.Whisper, model, "엔진 B: Whisper " + ShortModelName(model), true));
+                options.Add(new SttEngineOption(SttEngineType.Whisper, model,
+                    "엔진 B: Whisper " + ShortModelName(model) + (settings.WhisperUseGpu ? " · GPU" : " · CPU"), true));
             }
 #else
             options.Add(new SttEngineOption(SttEngineType.Whisper, "", "엔진 B: Whisper (패키지 없음)", false));

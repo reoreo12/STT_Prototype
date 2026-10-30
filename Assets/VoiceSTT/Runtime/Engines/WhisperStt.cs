@@ -18,6 +18,7 @@ namespace VoxelMagic.Voice
     public sealed class WhisperStt : SpeechToTextEngineBase
     {
         private readonly string modelName;
+        private readonly bool useGpu;
         private readonly string modelPath;
         private readonly string language;
         private readonly string initialPrompt;
@@ -44,6 +45,7 @@ namespace VoxelMagic.Voice
         {
             this.modelPath = modelPath ?? throw new ArgumentNullException(nameof(modelPath));
             this.modelName = modelName ?? "";
+            this.useGpu = useGpu;
             this.language = string.IsNullOrEmpty(language) ? "ko" : language;
             this.initialPrompt = initialPrompt ?? "";
             this.minSpeechLevel = minSpeechLevel;
@@ -59,6 +61,7 @@ namespace VoxelMagic.Voice
 
         public override string EngineName => "Whisper";
         public override string ModelName => modelName;
+        public override string ComputeBackend => useGpu ? "GPU" : "CPU";
         public override float InputLevel => recorder.IsCapturing ? recorder.Level : -1f;
 
         /// <summary>모델을 불러오는 데 걸린 시간(ms). 아직이면 -1.</summary>

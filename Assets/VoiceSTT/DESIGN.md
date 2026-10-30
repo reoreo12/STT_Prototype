@@ -412,3 +412,25 @@ STTTest
 ### 선택지와 이유
 - **상시 녹음과 누를 때 시작**: 누를 때 마이크를 켜면 장치가 준비되는 시간(이 PC에서 0.4~1.4초)을 피할 수 없다. 상시 녹음은 지연이 사라지는 대신, 플레이 중 Windows 마이크 사용 표시가 계속 켜져 있다. 게임에서는 **음성 모드를 고른 동안에만** 열어 두면 된다 (`keepMicrophoneOpen`으로 끌 수 있음).
 - **엔진 A는 그대로**: 받아쓰기는 Windows가 직접 마이크를 관리하므로 상시 녹음을 쓰지 않는다. 보조 녹음기도 기존처럼 누를 때 켠다.
+
+## 14. GPU/CPU 표시 — 2026-10-30 (승인: "제작 시작")
+
+지금은 GPU 사용 여부가 Unity UI와 기록 파일 어디에도 나오지 않아, 스크린샷만으로는 테스트 조건을 알 수 없다. 사용자 요청으로 아래처럼 표시한다.
+
+### 변경 내용
+
+| 대상 | 변경 |
+|---|---|
+| `ISpeechToText` | 읽기 전용 `ComputeBackend` 추가 ("GPU", "CPU", 해당 없음이면 ""). 기반 클래스는 "" 기본 구현, `WhisperStt`는 생성 시 받은 `useGpu` 값으로 "GPU"/"CPU"를 돌려준다 |
+| `SttResult` | `ComputeBackend` 필드 추가. 기반 클래스의 `Finish`에서 엔진 값을 그대로 담는다 (불변 유지) |
+| `SttEngineFactory` | Whisper 항목의 표시 이름에 붙임: `엔진 B: Whisper small-q5_1 · GPU` (설정의 `whisperUseGpu`에서 결정). 엔진 A는 그대로 |
+| `SttTestPanel` | 시도 결과의 시간 줄 끝에 `· GPU`/`· CPU` 추가: `음성 길이 1.99 s · 실시간 배율 0.22 · 엔진 시작 0 ms · GPU` |
+| `SttAttemptRecord` (CSV/JSONL) | `model` 다음에 `compute` 열 추가 (`GPU`/`CPU`/빈칸). 기존 CSV와 열 순서가 달라지므로 새 파일부터 적용된다 |
+| 테스트 | `CsvLogSinkTests`의 헤더·행 기대값 갱신 (`FakeSpeechToText`는 기반 클래스의 빈 값을 그대로 씀) |
+
+### 한계
+- 표시는 **설정값(요청)**이다. whisper.cpp는 Vulkan GPU를 찾지 못하면 조용히 CPU로 동작하는데, whisper.unity가 실제 사용 장치를 알려 주지 않는다. 실제 장치는 Console의 `whisper_backend_init_gpu: using Vulkan0 backend` 줄로 확인한다 (CHANGELOG 2026-10-30 참고).
+
+### 선택지와 이유
+- **드롭다운 이름에 붙이기**: 스크린샷에 항상 찍히는 곳이라 테스트 조건이 바로 남는다. 엔진을 만들기 전에도 알 수 있다.
+- **CSV 열 추가**: 나중에 기록 파일만으로 GPU/CPU 결과를 나눠 비교할 수 있다.

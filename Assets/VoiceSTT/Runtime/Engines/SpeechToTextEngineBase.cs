@@ -41,6 +41,7 @@ namespace VoxelMagic.Voice
 
         public abstract string EngineName { get; }
         public virtual string ModelName => "";
+        public virtual string ComputeBackend => "";
         public virtual bool SupportsDeviceSelection => true;
         public virtual float InputLevel => -1f;
 
@@ -244,7 +245,7 @@ namespace VoxelMagic.Voice
             double engineStartMs = listeningStartedAtMs >= 0 ? listeningStartedAtMs - pressedAtMs : -1;
 
             var result = new SttResult(
-                EngineName, ModelName, DescribeDevice(requestedDevice),
+                EngineName, ModelName, ComputeBackend, DescribeDevice(requestedDevice),
                 raw, normalized, hypotheses, error,
                 recordMs, transcribeMs, totalMs, audioSec, realtimeFactor, engineStartMs,
                 outcome.UsedHypothesisFallback, outcome.Audio);

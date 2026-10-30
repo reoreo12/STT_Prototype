@@ -35,7 +35,7 @@ namespace VoxelMagic.Voice.Tests
         [Test]
         public void File_HasBomHeaderAndRow()
         {
-            var result = new SttResult("Fake", "m", "mic", "불꽃아, 가자", "불꽃아가자", new[] { "불꽃" }, "",
+            var result = new SttResult("Fake", "m", "GPU", "mic", "불꽃아, 가자", "불꽃아가자", new[] { "불꽃" }, "",
                 1000, 250, 1250, 1, 0.25, 10, false, null);
             SttAttemptRecord record = SttAttemptRecord.Create(1, new DateTime(2026, 10, 29), result, "불꽃아",
                 new SpellMatchResult(0.8f, true, 0.75f), "", "6000.0.38f1", "Editor");
@@ -50,7 +50,8 @@ namespace VoxelMagic.Voice.Tests
 
             string[] lines = File.ReadAllLines(sink.FilePath, Encoding.UTF8);
             Assert.AreEqual(2, lines.Length);
-            StringAssert.StartsWith("id,timestamp,engine", lines[0]);
+            StringAssert.StartsWith("id,timestamp,engine,model,compute,micDevice", lines[0]);
+            StringAssert.Contains(",m,GPU,mic,", lines[1]);
             StringAssert.Contains("\"불꽃아, 가자\"", lines[1]);
         }
     }

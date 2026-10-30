@@ -14,7 +14,7 @@ namespace VoxelMagic.Voice.Debug
     {
         public static readonly string[] CsvHeader =
         {
-            "id", "timestamp", "engine", "model", "micDevice", "unityVersion", "buildType",
+            "id", "timestamp", "engine", "model", "compute", "micDevice", "unityVersion", "buildType",
             "targetPhrase", "rawText", "normalizedText", "similarity", "passed", "threshold",
             "recordMs", "transcribeMs", "totalLatencyMs", "audioSec", "realtimeFactor",
             "engineStartMs", "usedHypothesisFallback", "hypotheses", "wavFile", "error",
@@ -24,6 +24,7 @@ namespace VoxelMagic.Voice.Debug
         [SerializeField] private string timestamp;
         [SerializeField] private string engine;
         [SerializeField] private string model;
+        [SerializeField] private string compute;
         [SerializeField] private string micDevice;
         [SerializeField] private string unityVersion;
         [SerializeField] private string buildType;
@@ -50,6 +51,7 @@ namespace VoxelMagic.Voice.Debug
         public string Timestamp => timestamp;
         public string Engine => engine;
         public string Model => model;
+        public string Compute => compute;
         public string MicDevice => micDevice;
         public string UnityVersion => unityVersion;
         public string BuildType => buildType;
@@ -82,6 +84,7 @@ namespace VoxelMagic.Voice.Debug
                 timestamp = timestamp.ToString("yyyy-MM-ddTHH:mm:ss.fffzzz", CultureInfo.InvariantCulture),
                 engine = result.EngineName,
                 model = result.ModelName,
+                compute = result.ComputeBackend,
                 micDevice = result.MicDevice,
                 unityVersion = unityVersion ?? "",
                 buildType = buildType ?? "",
@@ -110,7 +113,7 @@ namespace VoxelMagic.Voice.Debug
             CultureInfo inv = CultureInfo.InvariantCulture;
             return new[]
             {
-                id.ToString(inv), timestamp, engine, model, micDevice, unityVersion, buildType,
+                id.ToString(inv), timestamp, engine, model, compute, micDevice, unityVersion, buildType,
                 targetPhrase, rawText, normalizedText,
                 similarity.ToString("0.####", inv), passed ? "true" : "false", threshold.ToString("0.##", inv),
                 recordMs.ToString("0.#", inv), transcribeMs.ToString("0.#", inv), totalLatencyMs.ToString("0.#", inv),

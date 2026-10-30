@@ -59,7 +59,9 @@ VoiceSTT 코드가 의존하는 **기본 포함 패키지** (새 프로젝트에
 |---|---|---|---|
 | `ggml-tiny.bin` | 77,691,713 B (77.7 MB) | `be07e048e1e599ad46341c8d2a135645097a538221678b7acdd1b1919c6e1b21` | https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin |
 | `ggml-base.bin` | 147,951,465 B (148 MB) | `60ed5bc3dd14eea856493d334349b405782ddcaf0028d4b5df4088345fba2efe` | https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin |
+| `ggml-small-q5_1.bin` (2026-10-29 추가) | 190,085,487 B (190 MB) | `ae85e4a935d7a567bd102fe55afc16bb595bdb618e11b2fc7591bc08120411bb` | https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin |
 
+- `ggml-small-q5_1`은 small 모델을 5비트로 양자화한 것이다. 원본 small(488 MB)보다 작고 빠르며, 정확도 차이는 작다. 설정 에셋의 `whisperModels` 목록에 넣어 엔진 드롭다운에 "엔진 B: Whisper small-q5_1"로 나온다 (코드 변경 없음)
 - 라이선스: MIT (OpenAI Whisper 가중치를 whisper.cpp 형식으로 변환한 것. 저장소 https://huggingface.co/ggerganov/whisper.cpp)
 - 저장 위치: **`Assets/StreamingAssets/VoiceSTT/`**. Unity 규칙상 StreamingAssets는 `Assets/` 바로 아래에 있어야 하므로 `Assets/VoiceSTT/` 밖에 둔다. **이식할 때 이 폴더도 함께 옮겨야 한다.**
 - **git에서 제외**: 프로젝트 루트 `.gitignore`에 아래 두 줄을 추가했다 (2026-10-29). 저장소를 새로 받으면 모델이 없으므로 아래 명령으로 받는다.
@@ -75,6 +77,7 @@ VoiceSTT 코드가 의존하는 **기본 포함 패키지** (새 프로젝트에
   mkdir -p Assets/StreamingAssets/VoiceSTT
   curl -L -o Assets/StreamingAssets/VoiceSTT/ggml-tiny.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin
   curl -L -o Assets/StreamingAssets/VoiceSTT/ggml-base.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
+  curl -L -o Assets/StreamingAssets/VoiceSTT/ggml-small-q5_1.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small-q5_1.bin
   sha256sum Assets/StreamingAssets/VoiceSTT/*.bin   # 위 표의 SHA-256과 비교
   ```
 
@@ -97,6 +100,10 @@ Assets/StreamingAssets/VoiceSTT/               (엔진 B 모델 파일 위치, �
 
 - **Runtime은 Debug를 참조하지 않는다.** 게임에는 Runtime만 있어도 컴파일된다.
 - 설정값은 모두 `Settings/SttSettings.asset`에서 읽는다 (엔진, 언어 `ko`, 녹음 키, 시간 제한, 기준값 0.75, 목표 주문 6개, 기록 여부).
+- 현재 기본값 (2026-10-30): 엔진 B, 시작 모델 `ggml-small-q5_1`, **GPU 켬**(`whisperUseGpu`), 초기 프롬프트 켬
+  - 바꾸는 곳: Project 창 `Assets/VoiceSTT/Settings/SttSettings` 선택 → Inspector "엔진" 묶음의 `Whisper Model`, `Whisper Use Gpu`
+  - 플레이를 멈춘 상태에서 바꾸고 다시 플레이해야 반영된다. Console의 `Whisper 모델 … 불러옴 (… ms, GPU=…)`로 확인한다
+  - GPU(Vulkan)를 지원하지 않는 PC에서는 라이브러리가 CPU로 동작한다. 그때 small은 tiny보다 몇 배 느리므로 tiny로 되돌리는 것을 검토한다
 - 주의: Debug 어셈블리의 네임스페이스가 `VoxelMagic.Voice.Debug`이므로, 그 안에서는 `UnityEngine.Debug.Log`처럼 전체 이름을 써야 한다.
 
 ## 6. 한글 폰트

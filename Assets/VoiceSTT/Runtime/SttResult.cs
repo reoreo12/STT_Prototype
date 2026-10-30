@@ -13,6 +13,7 @@ namespace VoxelMagic.Voice
         public SttResult(
             string engineName,
             string modelName,
+            string computeBackend,
             string micDevice,
             string rawText,
             string normalizedText,
@@ -29,6 +30,7 @@ namespace VoxelMagic.Voice
         {
             EngineName = engineName ?? "";
             ModelName = modelName ?? "";
+            ComputeBackend = computeBackend ?? "";
             MicDevice = micDevice ?? "";
             RawText = rawText ?? "";
             NormalizedText = normalizedText ?? "";
@@ -46,6 +48,10 @@ namespace VoxelMagic.Voice
 
         public string EngineName { get; }
         public string ModelName { get; }
+
+        /// <summary>"GPU", "CPU" 또는 빈 문자열 (엔진의 ComputeBackend).</summary>
+        public string ComputeBackend { get; }
+
         public string MicDevice { get; }
 
         /// <summary>엔진이 돌려준 원문.</summary>

@@ -312,7 +312,8 @@ namespace VoxelMagic.Voice.Debug
             string engineStart = record.EngineStartMs >= 0 ? $"{record.EngineStartMs:0} ms" : "-";
             timingText.text =
                 $"녹음 {record.RecordMs:0} ms · 변환 {record.TranscribeMs:0} ms · 전체 {record.TotalLatencyMs:0} ms\n" +
-                $"음성 길이 {record.AudioSec:0.00} s · 실시간 배율 {record.RealtimeFactor:0.00} · 엔진 시작 {engineStart}";
+                $"음성 길이 {record.AudioSec:0.00} s · 실시간 배율 {record.RealtimeFactor:0.00} · 엔진 시작 {engineStart}" +
+                (record.Compute.Length > 0 ? " · " + record.Compute : "");
 
             judgeText.text = $"판정: \"{record.TargetPhrase}\" 유사도 {record.Similarity:0.000} (기준 {record.Threshold:0.00}) → {(record.Passed ? "성공" : "실패")}";
             judgeText.color = record.Passed ? CompletedColor : FailedColor;

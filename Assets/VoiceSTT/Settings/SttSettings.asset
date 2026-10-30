@@ -13,12 +13,13 @@ MonoBehaviour:
   m_Name: SttSettings
   m_EditorClassIdentifier: 
   engineType: 1
-  whisperModel: ggml-tiny
+  whisperModel: ggml-small-q5_1
   whisperModels:
   - ggml-tiny
   - ggml-base
+  - ggml-small-q5_1
   whisperModelFolder: VoiceSTT
-  whisperUseGpu: 0
+  whisperUseGpu: 1
   whisperUseInitialPrompt: 1
   language: ko
   pushToTalkKey: 1

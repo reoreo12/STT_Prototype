@@ -12,6 +12,9 @@ namespace VoxelMagic.Voice
         string EngineName { get; }
         string ModelName { get; }
 
+        /// <summary>연산 장치 설정 ("GPU", "CPU"). 해당 없는 엔진은 빈 문자열. 실제 장치가 아니라 요청한 값이다.</summary>
+        string ComputeBackend { get; }
+
         /// <summary>마이크·OS 지원 여부. false면 게임은 HUD 모드로 넘어가면 된다.</summary>
         bool IsAvailable { get; }
         string UnavailableReason { get; }

@@ -99,3 +99,40 @@
 - 이 확인 과정에서 기록 파일에 시도 1건이 남았다 (사람 목소리 없이 방 소리만 녹음, 결과 "와!")
 - 남은 문제: 이 노트북 내장 마이크는 조용할 때 소리를 -120 dB 수준까지 지운다 (OS 또는 드라이버의 잡음 억제로 추정). 코드로는 고칠 수 없어서, 외부 마이크로 비교하거나 Windows 마이크 설정에서 "오디오 향상/음성 효과"를 끄고 시험할 것을 권장한다
 - `transcribeMs`에는 이제 postRoll 0.3초가 포함된다 (플레이어가 실제로 기다리는 시간)
+
+## 2026-10-29 — 모델 파일 두 번째 복구 (원인 확인)
+- 15:33에 모델 파일이 다시 사라졌다. 원인은 **GitHub Desktop에서 main 브랜치로 바꿨다가 돌아온 것**이다 (13:18도 같은 원인)
+  - 모델 제외 규칙(`.gitignore`의 `*.bin`)은 `voicestt-prototype` 브랜치에만 있고 main에는 없다
+  - 그래서 main에서는 모델 파일이 "제외된 파일"이 아니라 "새로 생긴 파일"로 보인다
+  - GitHub Desktop은 브랜치를 바꿀 때 바뀐 파일을 스태시(`!!GitHub_Desktop<main>`)로 옮긴다. 이때 모델 파일과 .meta도 함께 옮겨져 폴더에서 사라졌다
+- 복구: 다운로드 없이 그 스태시에서 4개 파일(.bin 2개, .meta 2개)을 꺼내 원래 자리에 두었다. SHA-256이 원본과 같다. 스태시는 지우지 않고 남겨 두었다
+- 재발 방지: voicestt-prototype을 main에 병합하기 전까지는 GitHub Desktop에서 main으로 바꾸지 않는다. 바꿔야 한다면 바꾸기 전에 모델 파일을 프로젝트 밖에 복사해 두거나, 돌아온 뒤 스태시를 복원한다
+
+## 2026-10-29 — Whisper small 모델 추가와 3개 모델 비교 (사용자 승인: 다운로드)
+- 계기: 실제 목소리로 시험했을 때 tiny가 "자라라"를 "찾아라", "바보"를 "아, 그럼"으로 받아쓰고 변환이 2~5초 걸림
+- 외부 파일: `ggml-small-q5_1.bin`(190 MB) 다운로드, SHA-256 확인 (SETUP.md 4번 표). `.gitignore`의 기존 규칙으로 git에서 제외됨
+- 설정 에셋 `SttSettings.asset`의 `whisperModels`에 `ggml-small-q5_1` 추가. 시작 모델(`whisperModel`)과 `whisperUseGpu`(꺼짐)는 바꾸지 않음
+- 비교 실험: 오늘 녹음된 WAV 23개를 tiny, base, small-q5_1로, 초기 프롬프트를 켠 경우와 끈 경우 모두 다시 변환 (실험만 GPU 사용)
+  - 주문 녹음 17개 중 목표 주문이 그대로 나온 수: 프롬프트 켬 tiny 4 / base 7 / small 7, 프롬프트 끔 tiny 0 / base 1 / small 4
+  - 자라라(17:23 녹음): small만 "자라라". tiny는 "바라라", base는 "찾아라"
+  - "바보"(17:23 녹음): 세 모델 모두 실패. 프롬프트를 켜면 small이 "아, 불꽃아"처럼 주문 쪽으로 끌려감
+  - 속도(GPU): 짧은 말은 tiny·base 약 0.05초, small 약 0.1초. 소리가 거의 없는 녹음에서 모델이 헤매면 최대 2~5초까지 늘어남
+  - 남은 실패 대부분은 녹음 문제: 빈 녹음, 첫 음절이 잘린 "나라"(개선 전 녹음), 무음에 가까운 소리를 "감사합니다"로 받아씀
+
+## 2026-10-30 — 시작 모델 small, GPU 켜기 (사용자 승인)
+- 설정 에셋 `SttSettings.asset`: `whisperModel` ggml-tiny → **ggml-small-q5_1**, `whisperUseGpu` 꺼짐 → **켬**. 코드 기본값(`SttSettings.cs`)은 바꾸지 않음
+- 확인: 파일 값 확인만 함. 이 시점에 STT_Prototype Unity 에디터가 열려 있지 않아 플레이 확인은 하지 못함
+- 참고: 확인하려던 중 Unity MCP가 다른 프로젝트(VoxelMagicSchool)에 연결되어 있었다. 그 프로젝트에서 콘솔 비우기, 에셋 새로 고침과 스크립트 다시 컴파일 요청, 플레이 시도(그 프로젝트의 기존 컴파일 에러로 실패)가 실행됐다. 파일은 바꾸지 않았다
+
+## 2026-10-30 — small + GPU 첫 테스트 (헤드셋 마이크)
+- 확인: Editor.log에 `ggml_vulkan: 0 = NVIDIA GeForce RTX 4060 Laptop GPU`, `whisper_backend_init_gpu: using Vulkan0 backend`, `[VoiceSTT] Whisper 모델 ggml-small-q5_1 불러옴 (1911 ms, GPU=True)` → GPU가 실제로 쓰임
+- 결과 (장치 확인용 1~3번 제외, 4~10번): 4/7 성공, 평균 변환 458 ms (시간 초과 1회 제외), 평균 유사도 0.645
+- 4번(실제 첫 변환)이 8초 시간 초과. GPU로 처음 변환할 때의 준비 시간으로 추정 → 미해결. 모델을 불러온 직후 한 번 미리 변환해 두는 방법(예열)을 검토
+- 설계: GPU/CPU 표시를 DESIGN.md 14번에 정리 (승인 전, 코드 변경 없음)
+
+## 2026-10-30 — GPU/CPU 표시 구현 (사용자 승인: "제작 시작", DESIGN.md 14번)
+- `ISpeechToText.ComputeBackend` 추가 (기반 클래스 "" / `WhisperStt` "GPU"·"CPU"), `SttResult.ComputeBackend` 추가 (생성자 인자 순서: modelName 다음)
+- 엔진 드롭다운: `엔진 B: Whisper small-q5_1 · GPU`처럼 표시. 시도 결과의 시간 줄 끝에 `· GPU`/`· CPU`
+- 기록: CSV/JSONL에 `compute` 열 추가 (`model` 다음). **이 변경 이후 새 기록 파일부터** 열 순서가 달라진다
+- 확인: 컴파일 에러·경고 0개, 단위 테스트 41개 통과, 플레이 모드에서 드롭다운 항목이 모두 `· GPU`로 표시되는 것을 확인
+- 한계: 표시는 설정값(요청)이다. GPU를 못 찾아 CPU로 바뀐 경우는 Console의 `whisper_backend_init_gpu` 줄로 확인한다
