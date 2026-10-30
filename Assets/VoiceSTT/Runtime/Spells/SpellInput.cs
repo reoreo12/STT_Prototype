@@ -1,3 +1,5 @@
+// 주문 시스템에 전달되는 입력 한 건과 그 출처 종류를 정의한다.
+
 using System;
 
 namespace VoxelMagic.Voice

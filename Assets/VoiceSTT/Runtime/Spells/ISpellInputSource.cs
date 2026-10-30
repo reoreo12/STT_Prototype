@@ -1,3 +1,5 @@
+// 음성 외 입력(HUD·마법진)도 같은 방식으로 주문 시스템에 연결하기 위한 입력 출처 계약을 정의한다.
+
 using System;
 
 namespace VoxelMagic.Voice

@@ -1,3 +1,5 @@
+// STT 테스트 씬의 진입점으로, 설정 에셋을 읽어 디버그용 객체들을 한곳에서 조립·연결한다.
+
 using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
@@ -12,15 +14,15 @@ namespace VoxelMagic.Voice.Debug
     [DefaultExecutionOrder(-100)]
     public sealed class SttBootstrap : MonoBehaviour
     {
-        [SerializeField] private SttSettings settings;
-        [SerializeField] private KeyboardPushToTalk keyboardInput;
-        [SerializeField] private SttTestPanel panel;
+        [SerializeField] private SttSettings settings; // 엔진·기록·판정 설정 에셋
+        [SerializeField] private KeyboardPushToTalk keyboardInput; // 키보드 누르고 말하기 입력
+        [SerializeField] private SttTestPanel panel; // 결과를 보여 줄 테스트 패널
         [Tooltip("Unity 창이 포커스를 잃어도 게임 루프를 계속 돌린다. 끄면 다른 창을 보는 동안 입력·시간 측정이 멈춘다.")]
         [SerializeField] private bool keepRunningInBackground = true;
 
-        private VoiceSpellInputSource voice;
-        private SttLogger logger;
-        private SttTestSession session;
+        private VoiceSpellInputSource voice; // Awake에서 만든 음성 입력원. Update마다 Tick
+        private SttLogger logger; // Awake에서 만든 기록기. OnDestroy에서 닫는다
+        private SttTestSession session; // Awake에서 만들어 패널에 연결한 테스트 세션
 
         /// <summary>게임 코드에서 음성 입력을 받아 쓰고 싶을 때 사용.</summary>
         public ISpellInputSource VoiceInput => voice;

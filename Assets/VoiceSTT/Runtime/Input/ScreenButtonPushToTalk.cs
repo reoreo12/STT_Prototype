@@ -1,3 +1,5 @@
+// 마우스·터치용 누르고 말하기 입력을 구현한다. 화면 버튼을 누르는 동안 녹음하도록 신호를 보낸다.
+
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;

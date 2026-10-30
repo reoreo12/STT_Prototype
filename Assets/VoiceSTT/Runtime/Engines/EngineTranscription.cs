@@ -1,3 +1,5 @@
+// 엔진 구현(A/B)이 기반 클래스에 넘기는 내부 결과를 담는다. 시간 값 없이 텍스트·오류·샘플만 전달한다.
+
 namespace VoxelMagic.Voice
 {
     /// <summary>

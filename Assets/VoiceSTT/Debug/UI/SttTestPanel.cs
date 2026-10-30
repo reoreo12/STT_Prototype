@@ -1,3 +1,5 @@
+// STT 인식 결과·판정·시간·세션 기록을 실시간으로 눈으로 확인하는 디버그 화면을 담는다.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -13,9 +15,10 @@ namespace VoxelMagic.Voice.Debug
     /// </summary>
     public sealed class SttTestPanel : MonoBehaviour
     {
-        private const int MaxRows = 200;
-        private const string FreeInputOption = "(자유 입력)";
+        private const int MaxRows = 200; // 기록 표에 남길 최대 행 수. 넘으면 가장 오래된 행을 지운다
+        private const string FreeInputOption = "(자유 입력)"; // 목표 주문 드롭다운 맨 끝 항목 이름
 
+        // 패널 색상: 배경·글자·안내문, 상태 표시(대기/녹음/변환/완료/실패), 슬라이더 강조색
         private static readonly Color Background = new Color(0.10f, 0.11f, 0.13f, 0.96f);
         private static readonly Color ColumnBackground = new Color(0.16f, 0.17f, 0.20f, 1f);
         private static readonly Color TextColor = new Color(0.92f, 0.92f, 0.92f);
@@ -28,34 +31,37 @@ namespace VoxelMagic.Voice.Debug
         private static readonly Color FailedColor = new Color(0.75f, 0.15f, 0.15f);
         private static readonly Color AccentColor = new Color(0.30f, 0.60f, 1f);
 
-        private readonly List<SttEngineOption> engineOptions = new List<SttEngineOption>();
-        private readonly List<string> micOptions = new List<string>();
+        private readonly List<SttEngineOption> engineOptions = new List<SttEngineOption>(); // 엔진 드롭다운 항목과 같은 순서의 엔진 선택지
+        private readonly List<string> micOptions = new List<string>(); // 마이크 드롭다운 항목별 장치 이름 (0번 ""는 기본 장치)
 
-        private SttTestSession session;
-        private ISpeechToText engine;
-        private IReadOnlyList<string> phrases = new string[0];
-        private bool built;
-        private bool suppressUiEvents;
-        private string engineMessage = "";
+        private SttTestSession session; // Bind로 연결된 세션. 연결 전에는 null
+        private ISpeechToText engine; // 현재 이벤트를 구독 중인 엔진
+        private IReadOnlyList<string> phrases = new string[0]; // 설정 에셋의 목표 주문 목록
+        private bool built; // Build로 UI를 이미 만들었는지
+        private bool suppressUiEvents; // 코드로 UI 값을 바꾸는 동안 변경 콜백을 무시하기 위한 플래그
+        private string engineMessage = ""; // 엔진 전환 실패 이유. 안내문에 함께 표시
 
-        private Dropdown engineDropdown;
-        private Dropdown micDropdown;
-        private Dropdown targetDropdown;
-        private InputField freeInput;
-        private Slider thresholdSlider;
-        private Text noticeText;
-        private Text statusText;
-        private Text levelText;
-        private RectTransform levelFill;
-        private Text hypothesisText;
-        private Text rawText;
-        private Text normalizedText;
-        private Text timingText;
-        private Text thresholdValueText;
-        private Text judgeText;
-        private Text summaryText;
-        private RectTransform tableContent;
-        private ScreenButtonPushToTalk pushButton;
+        // 상단 바·현재 시도 열의 조작 UI
+        private Dropdown engineDropdown; // 엔진 선택
+        private Dropdown micDropdown; // 마이크 장치 선택
+        private Dropdown targetDropdown; // 목표 주문 선택 (마지막 항목은 자유 입력)
+        private InputField freeInput; // 자유 입력 목표 주문 칸
+        private Slider thresholdSlider; // 성공 기준 (0~1)
+        private Text noticeText; // 상단 바 아래 안내문 (사용 불가·기록 꺼짐·전환 실패 등)
+        // 현재 시도 열의 표시 요소
+        private Text statusText; // 엔진 상태와 경과 시간 (ms)
+        private Text levelText; // 입력 음량 % 또는 사용 불가 안내
+        private RectTransform levelFill; // 음량 막대 채움. anchorMax.x(0~1)로 길이 조절
+        private Text hypothesisText; // 중간 결과
+        private Text rawText; // 최종 원문 또는 오류
+        private Text normalizedText; // 정규화 텍스트
+        private Text timingText; // 녹음·변환·전체 시간 등 측정값
+        private Text thresholdValueText; // 슬라이더 옆 성공 기준 숫자
+        private Text judgeText; // 판정 결과 (유사도·성공/실패)
+        // 기록 열
+        private Text summaryText; // 세션 요약
+        private RectTransform tableContent; // 기록 표 행이 들어가는 스크롤 content (최신이 위)
+        private ScreenButtonPushToTalk pushButton; // 화면의 "누르고 말하기" 버튼 입력
 
         public IPushToTalkSource PushButton => pushButton;
         public bool IsTextInputFocused => freeInput != null && freeInput.isFocused;

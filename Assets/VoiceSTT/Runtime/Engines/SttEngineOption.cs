@@ -1,3 +1,5 @@
+// 엔진 드롭다운 항목 하나(엔진 종류 + 모델)를 나타내는 값 타입을 담는다.
+
 using System;
 
 namespace VoxelMagic.Voice

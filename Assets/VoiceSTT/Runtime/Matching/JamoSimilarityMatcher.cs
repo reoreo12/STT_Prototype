@@ -1,3 +1,5 @@
+// 기본 주문 판정기를 구현한다. 자모 단위 편집 거리로 유사도를 내고 기준값 이상이면 통과시킨다.
+
 using System;
 
 namespace VoxelMagic.Voice
@@ -8,7 +10,7 @@ namespace VoxelMagic.Voice
     /// </summary>
     public sealed class JamoSimilarityMatcher : ISpellMatcher
     {
-        private float threshold;
+        private float threshold; // 통과 기준 유사도 (0~1로 잘라 저장)
 
         public JamoSimilarityMatcher(float threshold)
         {

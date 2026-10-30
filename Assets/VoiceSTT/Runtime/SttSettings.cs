@@ -1,3 +1,5 @@
+// VoiceSTT 설정 에셋(ScriptableObject)을 정의한다. 엔진·녹음·판정·기록 값을 코드 대신 에셋에서 조정한다.
+
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -12,7 +14,7 @@ namespace VoxelMagic.Voice
     public sealed class SttSettings : ScriptableObject
     {
         [Header("엔진")]
-        [SerializeField] private SttEngineType engineType = SttEngineType.WindowsDictation;
+        [SerializeField] private SttEngineType engineType = SttEngineType.WindowsDictation; // 시작할 때 고를 엔진 종류
         [Tooltip("엔진 B(Whisper)로 시작할 때 쓸 모델 이름 (확장자 .bin 제외).")]
         [SerializeField] private string whisperModel = "ggml-tiny";
         [Tooltip("엔진 드롭다운에 보일 Whisper 모델 목록 (확장자 .bin 제외).")]
@@ -27,7 +29,7 @@ namespace VoxelMagic.Voice
         [SerializeField] private string language = "ko";
 
         [Header("입력")]
-        [SerializeField] private Key pushToTalkKey = Key.Space;
+        [SerializeField] private Key pushToTalkKey = Key.Space; // 누르고 말하기 키
         [Tooltip("비워 두면 기본 마이크. 엔진 A는 항상 Windows 기본 마이크를 쓴다.")]
         [SerializeField] private string preferredMicDevice = "";
 
@@ -40,8 +42,8 @@ namespace VoxelMagic.Voice
         [SerializeField, Range(0f, 1f)] private float postRollSeconds = 0.3f;
 
         [Header("시간")]
-        [SerializeField, Min(1f)] private float maxRecordSeconds = 10f;
-        [SerializeField, Min(1f)] private float transcribeTimeoutSeconds = 8f;
+        [SerializeField, Min(1f)] private float maxRecordSeconds = 10f; // 최대 녹음 시간 (초). 넘으면 자동으로 변환 시작
+        [SerializeField, Min(1f)] private float transcribeTimeoutSeconds = 8f; // 뗀 뒤 변환 제한 시간 (초). 넘으면 실패 처리
         [Tooltip("엔진 A: 키를 뗀 뒤 최종 결과(DictationResult)를 기다리는 시간.")]
         [SerializeField, Min(0)] private int dictationFinalResultWaitMs = 1500;
         [Tooltip("엔진 A: 음량 미터·WAV 저장을 위해 Unity Microphone으로 함께 녹음한다. 받아쓰기와 충돌하면 끈다.")]
@@ -52,16 +54,16 @@ namespace VoxelMagic.Voice
         [SerializeField, Min(0f)] private float minAudioSeconds = 0.3f;
 
         [Header("판정")]
-        [SerializeField, Range(0f, 1f)] private float similarityThreshold = 0.75f;
-        [SerializeField] private string[] targetPhrases = { "빛나라", "찾아라", "느려져라", "불꽃아", "자라라", "숨어라" };
+        [SerializeField, Range(0f, 1f)] private float similarityThreshold = 0.75f; // 주문 통과 기준 자모 유사도 (0~1)
+        [SerializeField] private string[] targetPhrases = { "빛나라", "찾아라", "느려져라", "불꽃아", "자라라", "숨어라" }; // 목표 주문 목록 (Whisper 초기 프롬프트에도 사용)
 
         [Header("기록 (출시 빌드에서는 끔)")]
-        [SerializeField] private bool loggingEnabled = true;
-        [SerializeField] private bool writeCsv = true;
-        [SerializeField] private bool writeJsonl = true;
+        [SerializeField] private bool loggingEnabled = true; // 변환 결과 기록 전체 켜기
+        [SerializeField] private bool writeCsv = true; // CSV 파일로 기록
+        [SerializeField] private bool writeJsonl = true; // JSONL 파일로 기록
         [Tooltip("녹음 샘플이 있는 엔진에서만 WAV를 저장한다.")]
         [SerializeField] private bool saveWav = true;
-        [SerializeField] private string logFolderName = "STTLogs";
+        [SerializeField] private string logFolderName = "STTLogs"; // 기록 파일을 저장할 폴더 이름
 
         public SttEngineType EngineType => engineType;
         public string WhisperModel => whisperModel;

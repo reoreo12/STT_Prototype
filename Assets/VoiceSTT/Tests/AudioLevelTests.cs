@@ -1,3 +1,5 @@
+// AudioLevel의 RMS→데시벨 레벨 변환과 구간 피크 계산을 검증한다.
+
 using System;
 using NUnit.Framework;
 

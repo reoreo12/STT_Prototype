@@ -1,3 +1,5 @@
+// 자모 유사도 판정에 쓰는 편집 거리 계산을 담는다.
+
 using System;
 using System.Collections.Generic;
 

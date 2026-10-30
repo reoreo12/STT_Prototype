@@ -1,3 +1,5 @@
+// 테스트 세션의 시도 기록을 CSV·JSONL·WAV로 남기는 창구를 하나로 모은다.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,9 +12,9 @@ namespace VoxelMagic.Voice.Debug
     /// </summary>
     public sealed class SttLogger : IDisposable
     {
-        private readonly List<ISttLogSink> sinks;
-        private readonly bool saveWav;
-        private bool opened;
+        private readonly List<ISttLogSink> sinks; // 기록을 나눠 쓸 저장 방식 목록 (생성 시 복사본)
+        private readonly bool saveWav; // 시도마다 녹음을 WAV로 저장할지
+        private bool opened; // sink들의 파일을 이미 열었는지 (첫 Write에서 한 번만 연다)
 
         public SttLogger(string folderPath, bool enabled, bool saveWav, IEnumerable<ISttLogSink> sinks)
         {

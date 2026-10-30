@@ -1,3 +1,5 @@
+// 설정과 팩토리에서 고르는 엔진 종류 목록을 정의한다.
+
 namespace VoxelMagic.Voice
 {
     /// <summary>

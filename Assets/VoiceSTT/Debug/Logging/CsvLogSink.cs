@@ -1,3 +1,5 @@
+// STT 시도 기록을 엑셀에서 바로 열어 볼 수 있는 CSV 파일로 남긴다.
+
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,7 +9,7 @@ namespace VoxelMagic.Voice.Debug
     /// <summary>CSV 기록. 엑셀에서 한글이 깨지지 않도록 UTF-8 BOM을 넣는다.</summary>
     public sealed class CsvLogSink : ISttLogSink
     {
-        private StreamWriter writer;
+        private StreamWriter writer; // 열린 CSV 파일 쓰기 스트림. Open 전·Dispose 후에는 null
 
         public string FilePath { get; private set; } = "";
 

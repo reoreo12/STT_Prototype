@@ -1,3 +1,5 @@
+// 변환 한 건의 텍스트·지연 시간·오류를 묶는 결과 객체를 담는다. UI 표시, 기록, 주문 판정이 모두 이것을 받는다.
+
 using System.Collections.Generic;
 
 namespace VoxelMagic.Voice
@@ -8,7 +10,7 @@ namespace VoxelMagic.Voice
     /// </summary>
     public sealed class SttResult
     {
-        private readonly string[] hypotheses;
+        private readonly string[] hypotheses; // 중간 결과 목록의 복사본 (외부 변경 차단)
 
         public SttResult(
             string engineName,

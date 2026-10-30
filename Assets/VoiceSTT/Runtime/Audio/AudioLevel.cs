@@ -1,3 +1,5 @@
+// 음량 미터와 무음 판정(엔진 B)이 같은 dB 기준을 쓰도록 음량 계산을 한곳에 모은다.
+
 using System;
 using System.Collections.Generic;
 
@@ -9,7 +11,7 @@ namespace VoxelMagic.Voice
     /// </summary>
     public static class AudioLevel
     {
-        private const float FloorDb = -60f;
+        private const float FloorDb = -60f; // 음량 0에 해당하는 하한 (dB)
 
         public static float FromRms(double rms)
         {

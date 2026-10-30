@@ -1,3 +1,5 @@
+// 주문 판정 방식을 교체할 수 있도록 판정기 인터페이스와 판정 결과 구조체를 정의한다.
+
 namespace VoxelMagic.Voice
 {
     /// <summary>

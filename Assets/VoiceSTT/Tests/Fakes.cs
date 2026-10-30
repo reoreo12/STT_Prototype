@@ -1,3 +1,5 @@
+// 테스트에서 시간과 인식 결과를 직접 조종하기 위한 가짜 시계와 가짜 STT 엔진이다.
+
 using System.Threading.Tasks;
 
 namespace VoxelMagic.Voice.Tests
@@ -16,7 +18,7 @@ namespace VoxelMagic.Voice.Tests
     /// <summary>테스트용 엔진. 결과를 돌려주는 시점을 테스트가 정한다.</summary>
     internal sealed class FakeSpeechToText : SpeechToTextEngineBase
     {
-        private TaskCompletionSource<EngineTranscription> pending;
+        private TaskCompletionSource<EngineTranscription> pending; // 변환 요청 때 만들고 Complete로 결과를 넣는 대기 작업
 
         public FakeSpeechToText(ITimeSource time, float maxRecordSeconds = 10f, float transcribeTimeoutSeconds = 8f)
             : base(time, maxRecordSeconds, transcribeTimeoutSeconds)

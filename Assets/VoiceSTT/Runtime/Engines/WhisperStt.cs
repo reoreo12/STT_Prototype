@@ -1,3 +1,5 @@
+// 엔진 B: whisper.unity로 기기 안에서 변환하는 구현을 담는다. VOICESTT_WHISPER 정의가 있을 때만 컴파일된다.
+
 #if VOICESTT_WHISPER
 using System;
 using System.IO;
@@ -17,25 +19,25 @@ namespace VoxelMagic.Voice
     /// </summary>
     public sealed class WhisperStt : SpeechToTextEngineBase
     {
-        private readonly string modelName;
-        private readonly bool useGpu;
-        private readonly string modelPath;
-        private readonly string language;
-        private readonly string initialPrompt;
-        private readonly float minSpeechLevel;
-        private readonly float minAudioSeconds;
-        private readonly bool keepMicrophoneOpen;
-        private readonly double preRollSeconds;
-        private readonly double postRollMs;
-        private readonly MicrophoneRecorder recorder;
+        private readonly string modelName; // 모델 이름 (확장자 제외, 예: ggml-tiny)
+        private readonly bool useGpu; // GPU 사용 요청 여부
+        private readonly string modelPath; // 모델 파일(.bin) 절대 경로
+        private readonly string language; // 인식 언어 코드 (기본 ko)
+        private readonly string initialPrompt; // Whisper 초기 프롬프트 (빈 문자열이면 쓰지 않음)
+        private readonly float minSpeechLevel; // 이 최대 음량(0~1) 미만이면 무음으로 보고 변환하지 않음
+        private readonly float minAudioSeconds; // 이보다 짧은 녹음(초)은 변환하지 않음
+        private readonly bool keepMicrophoneOpen; // 마이크를 미리 열어 두는지
+        private readonly double preRollSeconds; // 누르기 직전 포함할 길이 (초)
+        private readonly double postRollMs; // 뗀 뒤 더 녹음할 길이 (ms)
+        private readonly MicrophoneRecorder recorder; // 녹음기
 
-        private WhisperWrapper whisper;
-        private bool loading;
-        private bool loadNotified;
-        private string loadError = "";
-        private string preferredDevice = "";
-        private TaskCompletionSource<bool> postRollSignal;
-        private double postRollDeadlineMs;
+        private WhisperWrapper whisper; // 불러온 Whisper 모델. 로딩 전이면 null
+        private bool loading; // 모델 로딩 중인지
+        private bool loadNotified; // 로딩 끝난 뒤 가용성 갱신을 이미 했는지
+        private string loadError = ""; // 모델 파일 없음·로딩 실패 이유
+        private string preferredDevice = ""; // 미리 열어 둘 마이크 장치 이름
+        private TaskCompletionSource<bool> postRollSignal; // postRoll 대기가 끝나면 완료되는 신호
+        private double postRollDeadlineMs; // postRoll 대기 종료 시각 (ms)
 
         public WhisperStt(ITimeSource time, float maxRecordSeconds, float transcribeTimeoutSeconds,
             string modelPath, string modelName, string language, bool useGpu, string initialPrompt,

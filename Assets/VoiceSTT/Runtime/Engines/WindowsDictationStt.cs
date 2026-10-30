@@ -1,3 +1,5 @@
+// 엔진 A: Windows 내장 받아쓰기(DictationRecognizer)로 변환하는 구현을 담는다. 모델 파일 없이 OS 음성 인식을 쓴다.
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -14,20 +16,20 @@ namespace VoxelMagic.Voice
     /// </summary>
     public sealed class WindowsDictationStt : SpeechToTextEngineBase
     {
-        private readonly int finalResultWaitMs;
-        private readonly float silenceTimeoutSeconds;
-        private readonly MicrophoneRecorder recorder;
-        private readonly List<string> segments = new List<string>();
+        private readonly int finalResultWaitMs; // 뗀 뒤 최종 결과를 기다리는 시간 (ms)
+        private readonly float silenceTimeoutSeconds; // 받아쓰기 무음 제한 시간 (초, 최대 녹음 시간 + 5초)
+        private readonly MicrophoneRecorder recorder; // 음량 미터·WAV용 보조 녹음기 (null이면 끔)
+        private readonly List<string> segments = new List<string>(); // 이번 녹음에서 확정된 문장들
 
-        private string currentHypothesis = "";
-        private string lastEngineError = "";
-        private bool recognizerStopped;
-        private AudioSamples recordedAudio;
-        private TaskCompletionSource<EngineTranscription> finishSignal;
-        private double finishDeadlineMs;
+        private string currentHypothesis = ""; // 아직 확정되지 않은 마지막 중간 결과
+        private string lastEngineError = ""; // 받아쓰기가 알린 마지막 오류·종료 이유
+        private bool recognizerStopped; // 받아쓰기가 스스로 끝났는지 (완료·오류 이벤트)
+        private AudioSamples recordedAudio; // 보조 녹음기로 얻은 샘플 (없으면 null)
+        private TaskCompletionSource<EngineTranscription> finishSignal; // 최종 결과 대기 중일 때만 존재하는 완료 신호
+        private double finishDeadlineMs; // 최종 결과 대기 종료 시각 (ms)
 
 #if UNITY_STANDALONE_WIN || UNITY_EDITOR_WIN
-        private DictationRecognizer recognizer;
+        private DictationRecognizer recognizer; // Windows 받아쓰기 인식기 (처음 들을 때 생성)
 #endif
 
         /// <param name="recorder">음량 미터·WAV용 보조 녹음기. 마이크 충돌이 있으면 null로 끈다.</param>

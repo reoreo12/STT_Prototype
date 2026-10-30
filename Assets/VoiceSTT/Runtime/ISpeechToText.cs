@@ -1,3 +1,5 @@
+// STT 엔진 교체의 기준이 되는 인터페이스를 정의한다. 게임과 UI는 이것만 참조해 엔진 A/B를 바꿔 끼운다.
+
 using System;
 using System.Threading.Tasks;
 

@@ -1,10 +1,12 @@
+// JamoSimilarityMatcher의 자모 유사도·성공 기준 판정과 Levenshtein 편집 거리를 검증한다.
+
 using NUnit.Framework;
 
 namespace VoxelMagic.Voice.Tests
 {
     public sealed class JamoSimilarityMatcherTests
     {
-        private JamoSimilarityMatcher matcher;
+        private JamoSimilarityMatcher matcher; // 테스트마다 기준 0.75로 새로 만드는 매처
 
         [SetUp]
         public void SetUp()

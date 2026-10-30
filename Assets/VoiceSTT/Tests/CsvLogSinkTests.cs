@@ -1,3 +1,5 @@
+// CsvLogSink의 CSV 값 이스케이프와 BOM·헤더·행이 담긴 파일 출력을 검증한다.
+
 using System;
 using System.IO;
 using System.Text;
@@ -8,7 +10,7 @@ namespace VoxelMagic.Voice.Tests
 {
     public sealed class CsvLogSinkTests
     {
-        private string folder;
+        private string folder; // 테스트마다 만드는 임시 로그 폴더 경로(끝나면 삭제)
 
         [SetUp]
         public void SetUp()

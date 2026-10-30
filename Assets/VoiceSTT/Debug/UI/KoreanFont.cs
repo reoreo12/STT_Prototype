@@ -1,3 +1,5 @@
+// 폰트 에셋 없이 테스트 UI의 한글이 깨지지 않도록 OS 한글 폰트를 찾아 준다.
+
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,12 +11,13 @@ namespace VoxelMagic.Voice.Debug
     /// </summary>
     public static class KoreanFont
     {
+        // 찾아볼 OS 한글 폰트 이름. 앞쪽부터 설치 여부를 확인해 처음 찾은 것을 쓴다
         private static readonly string[] Candidates =
         {
             "Malgun Gothic", "맑은 고딕", "Apple SD Gothic Neo", "Noto Sans CJK KR", "Noto Sans KR", "NanumGothic",
         };
 
-        private static Font cached;
+        private static Font cached; // 처음 Get에서 만든 폰트. 이후 호출은 이것을 돌려준다
 
         public static string ResolvedName { get; private set; } = "";
 

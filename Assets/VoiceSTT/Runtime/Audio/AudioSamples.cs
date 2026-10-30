@@ -1,3 +1,5 @@
+// 녹음 샘플을 엔진·변환 결과·WAV 저장 사이에서 안전하게 넘기기 위한 불변 컨테이너를 담는다.
+
 using System;
 using System.Collections.Generic;
 
@@ -6,7 +8,7 @@ namespace VoxelMagic.Voice
     /// <summary>녹음된 PCM 샘플 (인터리브드 float, -1~1). 만든 뒤에는 바뀌지 않는다.</summary>
     public sealed class AudioSamples
     {
-        private readonly float[] data;
+        private readonly float[] data; // 인터리브드 PCM 샘플 (-1~1)
 
         public AudioSamples(float[] data, int sampleRate, int channels)
         {

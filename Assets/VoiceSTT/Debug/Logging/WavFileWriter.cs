@@ -1,3 +1,5 @@
+// 시도별 녹음을 표준 WAV 파일로 저장해 인식 결과와 실제 음성을 나중에 대조해 볼 수 있게 한다.
+
 using System;
 using System.IO;
 using System.Text;

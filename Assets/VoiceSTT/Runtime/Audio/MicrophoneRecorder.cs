@@ -1,3 +1,5 @@
+// Unity Microphone 녹음을 감싼다. 엔진 B의 녹음과 엔진 A의 보조 녹음(음량 미터·WAV)에 함께 쓴다.
+
 using System;
 using UnityEngine;
 
@@ -11,16 +13,16 @@ namespace VoxelMagic.Voice
     /// </summary>
     public sealed class MicrophoneRecorder : IDisposable
     {
-        private const int PreferredSampleRate = 16000;
-        private const int LevelWindow = 1024;
+        private const int PreferredSampleRate = 16000; // 요청 샘플레이트 (Hz). 장치 지원 범위로 잘린다
+        private const int LevelWindow = 1024; // 음량 계산에 쓰는 최근 샘플 수 (전 채널 합계)
 
-        private readonly int clipSeconds;
-        private readonly float[] levelBuffer = new float[LevelWindow];
-        private AudioClip clip;
-        private string device;
-        private int lastPosition;
-        private long writtenFrames;
-        private long captureStartFrame;
+        private readonly int clipSeconds; // 링 버퍼 클립 길이 (초, 최대 캡처 길이 + 2초 여유)
+        private readonly float[] levelBuffer = new float[LevelWindow]; // 음량 계산용 버퍼 (현재 코드에서는 쓰이지 않음)
+        private AudioClip clip; // 반복 녹음 중인 링 버퍼 클립. null이면 마이크가 닫힌 상태
+        private string device; // 열린 마이크 장치 이름 (null이면 기본 장치)
+        private int lastPosition; // 마지막으로 확인한 클립 내 녹음 위치 (프레임)
+        private long writtenFrames; // 마이크를 연 뒤 누적 기록된 프레임 수 (링 순환과 무관)
+        private long captureStartFrame; // 캡처 시작 지점 (writtenFrames 기준, preRoll 포함)
 
         /// <param name="maxCaptureSeconds">한 번에 잘라 쓸 수 있는 최대 길이(녹음 + preRoll + postRoll).</param>
         public MicrophoneRecorder(float maxCaptureSeconds)

@@ -1,3 +1,5 @@
+// 테스트 UI와 STT 핵심 로직 사이에서 시도마다 판정·기록·통계를 처리하는 세션 로직을 담는다.
+
 using System;
 using System.Collections.Generic;
 
@@ -9,15 +11,15 @@ namespace VoxelMagic.Voice.Debug
     /// </summary>
     public sealed class SttTestSession : IDisposable
     {
-        private readonly VoiceSpellInputSource voice;
-        private readonly ISpellMatcher matcher;
-        private readonly SttLogger logger;
-        private readonly SttEngineFactory factory;
-        private readonly string unityVersion;
-        private readonly string buildType;
-        private readonly List<SttAttemptRecord> attempts = new List<SttAttemptRecord>();
-        private readonly SttSessionStats stats = new SttSessionStats();
-        private int nextId = 1;
+        private readonly VoiceSpellInputSource voice; // 변환 완료 이벤트를 받는 음성 입력원. 엔진 교체도 여기로 한다
+        private readonly ISpellMatcher matcher; // 인식 결과와 목표 주문을 비교해 성공 여부를 판정
+        private readonly SttLogger logger; // 시도 기록·WAV 저장 담당
+        private readonly SttEngineFactory factory; // 엔진 선택지 목록과 엔진 생성 담당
+        private readonly string unityVersion; // 기록에 남길 Unity 버전
+        private readonly string buildType; // 기록에 남길 빌드 종류 (Editor 등)
+        private readonly List<SttAttemptRecord> attempts = new List<SttAttemptRecord>(); // 이번 세션의 시도 기록 (화면 목록용, ClearAttempts로 비움)
+        private readonly SttSessionStats stats = new SttSessionStats(); // 세션 요약 누적 값
+        private int nextId = 1; // 다음 시도에 붙일 번호. ClearAttempts 후에도 이어진다
 
         public SttTestSession(VoiceSpellInputSource voice, ISpellMatcher matcher, SttLogger logger,
             SttEngineFactory factory, SttEngineOption initialEngine, string initialTarget, string unityVersion, string buildType)

@@ -1,3 +1,5 @@
+// 설정 에셋을 읽어 엔진 선택 목록을 만들고 엔진 객체를 생성한다. 엔진 생성 코드를 한곳에 모은다.
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,9 +13,9 @@ namespace VoxelMagic.Voice
     /// </summary>
     public sealed class SttEngineFactory
     {
-        private readonly SttSettings settings;
-        private readonly ITimeSource time;
-        private readonly List<SttEngineOption> options = new List<SttEngineOption>();
+        private readonly SttSettings settings; // 엔진 생성에 쓰는 설정 에셋
+        private readonly ITimeSource time; // 생성하는 엔진에 넘길 시계
+        private readonly List<SttEngineOption> options = new List<SttEngineOption>(); // 엔진 선택 항목 목록 (첫 항목은 엔진 A, 기본값을 못 찾으면 이것을 쓴다)
 
         public SttEngineFactory(SttSettings settings, ITimeSource time)
         {

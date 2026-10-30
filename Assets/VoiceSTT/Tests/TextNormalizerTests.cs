@@ -1,3 +1,5 @@
+// TextNormalizer가 공백·문장부호를 없애고 소문자로 바꾸는지 검증한다.
+
 using NUnit.Framework;
 
 namespace VoxelMagic.Voice.Tests

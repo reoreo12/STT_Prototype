@@ -1,3 +1,5 @@
+// 프리팹 없이 테스트 패널 UI를 코드로 짜기 위해 uGUI 요소 생성 코드를 모아 둔다.
+
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,10 +10,10 @@ namespace VoxelMagic.Voice.Debug
     /// <summary>uGUI 요소를 코드로 만드는 도우미. 모든 Text에 한글 폰트를 넣는다.</summary>
     internal static class SttPanelLayout
     {
-        public const int BodyFontSize = 20;
+        public const int BodyFontSize = 20; // 본문·컨트롤 기본 글자 크기
 
-        private static readonly DefaultControls.Resources Resources = new DefaultControls.Resources();
-        private static readonly Color ControlTextColor = new Color(0.12f, 0.12f, 0.12f);
+        private static readonly DefaultControls.Resources Resources = new DefaultControls.Resources(); // 기본 컨트롤 생성용 빈 리소스 (스프라이트 없음)
+        private static readonly Color ControlTextColor = new Color(0.12f, 0.12f, 0.12f); // 밝은 컨트롤(버튼·드롭다운·입력칸) 안 글자색
 
         public static RectTransform CreateRoot(Transform parent, Color background)
         {

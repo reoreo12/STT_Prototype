@@ -1,3 +1,5 @@
+// 엔진 A/B가 공유하는 상태 전이·시간 측정·시간 제한 흐름을 담는다. 새 엔진은 이것을 상속해 엔진별 부분만 구현한다.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,22 +13,22 @@ namespace VoxelMagic.Voice
     /// </summary>
     public abstract class SpeechToTextEngineBase : ISpeechToText
     {
-        private readonly ITimeSource time;
-        private readonly double maxRecordMs;
-        private readonly double transcribeTimeoutMs;
-        private readonly List<string> hypotheses = new List<string>();
+        private readonly ITimeSource time; // 시간 측정·시간 제한에 쓰는 시계
+        private readonly double maxRecordMs; // 최대 녹음 시간 (ms). 넘으면 자동으로 변환 시작
+        private readonly double transcribeTimeoutMs; // 뗀 뒤 변환 제한 시간 (ms). 넘으면 실패 처리
+        private readonly List<string> hypotheses = new List<string>(); // 이번 녹음에서 받은 중간 결과 (연속 중복 제외)
 
-        private SttState state = SttState.Idle;
-        private bool availabilityChecked;
-        private bool isAvailable;
-        private string unavailableReason = "";
-        private string requestedDevice = "";
-        private double pressedAtMs;
-        private double releasedAtMs = -1;
-        private double listeningStartedAtMs = -1;
-        private TaskCompletionSource<string> abortSignal;
-        private Task<SttResult> pendingTranscription;
-        private bool disposed;
+        private SttState state = SttState.Idle; // 현재 진행 단계
+        private bool availabilityChecked; // 가용성을 한 번이라도 검사했는지
+        private bool isAvailable; // 마지막 가용성 검사 결과
+        private string unavailableReason = ""; // 사용 불가 이유 (사용 가능하면 빈 문자열)
+        private string requestedDevice = ""; // StartListening에 받은 마이크 장치 이름
+        private double pressedAtMs; // 누른 시각 (ms)
+        private double releasedAtMs = -1; // 뗀 시각 (ms). 아직이면 -1
+        private double listeningStartedAtMs = -1; // 엔진이 실제로 듣기 시작한 시각 (ms). 모르면 -1
+        private TaskCompletionSource<string> abortSignal; // 변환 중단 신호 (시간 초과·취소 이유를 담는다)
+        private Task<SttResult> pendingTranscription; // 진행 중인 변환 작업 (중복 호출 시 같은 작업을 돌려준다)
+        private bool disposed; // Dispose 호출 여부
 
         protected SpeechToTextEngineBase(ITimeSource time, float maxRecordSeconds, float transcribeTimeoutSeconds)
         {

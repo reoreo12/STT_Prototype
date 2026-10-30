@@ -1,3 +1,5 @@
+// 엔진마다 다른 띄어쓰기·문장부호가 판정에 영향을 주지 않도록 비교 전에 텍스트를 정리한다.
+
 using System.Text;
 
 namespace VoxelMagic.Voice

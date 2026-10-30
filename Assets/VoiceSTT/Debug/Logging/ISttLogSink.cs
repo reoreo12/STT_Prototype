@@ -1,3 +1,5 @@
+// 기록 저장 형식(CSV·JSONL 등)을 바꿔 끼울 수 있도록 공통 계약을 정한다.
+
 using System;
 
 namespace VoxelMagic.Voice.Debug

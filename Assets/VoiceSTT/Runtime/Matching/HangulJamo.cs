@@ -1,3 +1,5 @@
+// 주문 판정을 위해 한글 음절을 자모로 쪼갠다. 발음이 비슷한 오인식을 글자 단위보다 관대하게 비교하는 바탕이다.
+
 using System.Collections.Generic;
 
 namespace VoxelMagic.Voice
@@ -8,25 +10,25 @@ namespace VoxelMagic.Voice
     /// </summary>
     public static class HangulJamo
     {
-        private const int SyllableBase = 0xAC00;
-        private const int SyllableLast = 0xD7A3;
-        private const int JungCount = 21;
-        private const int JongCount = 28;
+        private const int SyllableBase = 0xAC00; // 첫 한글 음절 '가'의 코드값
+        private const int SyllableLast = 0xD7A3; // 마지막 한글 음절 '힣'의 코드값
+        private const int JungCount = 21; // 중성 개수
+        private const int JongCount = 28; // 종성 개수 (받침 없음 포함)
 
-        private static readonly char[] Cho =
+        private static readonly char[] Cho = // 초성 19개 (유니코드 순서)
         {
             'ㄱ', 'ㄲ', 'ㄴ', 'ㄷ', 'ㄸ', 'ㄹ', 'ㅁ', 'ㅂ', 'ㅃ', 'ㅅ',
             'ㅆ', 'ㅇ', 'ㅈ', 'ㅉ', 'ㅊ', 'ㅋ', 'ㅌ', 'ㅍ', 'ㅎ',
         };
 
-        private static readonly char[] Jung =
+        private static readonly char[] Jung = // 중성 21개 (유니코드 순서)
         {
             'ㅏ', 'ㅐ', 'ㅑ', 'ㅒ', 'ㅓ', 'ㅔ', 'ㅕ', 'ㅖ', 'ㅗ', 'ㅘ',
             'ㅙ', 'ㅚ', 'ㅛ', 'ㅜ', 'ㅝ', 'ㅞ', 'ㅟ', 'ㅠ', 'ㅡ', 'ㅢ', 'ㅣ',
         };
 
         // 0번은 받침 없음
-        private static readonly char[] Jong =
+        private static readonly char[] Jong = // 종성 28개 (유니코드 순서)
         {
             '\0', 'ㄱ', 'ㄲ', 'ㄳ', 'ㄴ', 'ㄵ', 'ㄶ', 'ㄷ', 'ㄹ', 'ㄺ',
             'ㄻ', 'ㄼ', 'ㄽ', 'ㄾ', 'ㄿ', 'ㅀ', 'ㅁ', 'ㅂ', 'ㅄ', 'ㅅ',

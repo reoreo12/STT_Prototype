@@ -1,3 +1,5 @@
+// SpeechToTextEngineBase의 상태 전이·시간 측정·시간 제한·취소 흐름을 검증한다.
+
 using System.Collections.Generic;
 using System.Threading;
 using NUnit.Framework;
@@ -10,11 +12,11 @@ namespace VoxelMagic.Voice.Tests
     /// </summary>
     public sealed class SpeechToTextEngineBaseTests
     {
-        private SynchronizationContext previousContext;
-        private FakeTimeSource time;
-        private FakeSpeechToText engine;
-        private List<SttState> states;
-        private SttResult completed;
+        private SynchronizationContext previousContext; // 테스트 전 동기화 컨텍스트(TearDown에서 되돌림)
+        private FakeTimeSource time; // 테스트가 직접 움직이는 가짜 시계
+        private FakeSpeechToText engine; // 검증 대상 기반 클래스를 상속한 가짜 엔진
+        private List<SttState> states; // StateChanged로 받은 상태를 순서대로 모은 목록
+        private SttResult completed; // Completed 이벤트로 받은 마지막 결과(없으면 null)
 
         [SetUp]
         public void SetUp()

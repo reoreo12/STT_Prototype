@@ -1,3 +1,5 @@
+// HangulJamo의 음절→자모 분해와 한글 음절 범위 판별을 검증한다.
+
 using NUnit.Framework;
 
 namespace VoxelMagic.Voice.Tests

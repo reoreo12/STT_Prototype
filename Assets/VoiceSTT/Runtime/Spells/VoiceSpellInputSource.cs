@@ -1,3 +1,5 @@
+// 누르고 말하기 입력과 STT 엔진을 이어 음성 주문 입력을 만든다. 게임 이식 시 주문 시스템이 구독하는 진입점이다.
+
 using System;
 using System.Collections.Generic;
 
@@ -9,11 +11,11 @@ namespace VoxelMagic.Voice
     /// </summary>
     public sealed class VoiceSpellInputSource : ISpellInputSource, IDisposable
     {
-        private readonly List<IPushToTalkSource> triggers;
-        private ISpeechToText engine;
-        private string micDevice = "";
-        private bool lastAvailability;
-        private bool disposed;
+        private readonly List<IPushToTalkSource> triggers; // 구독 중인 누르고 말하기 입력들. 모두 떼야 변환을 시작한다
+        private ISpeechToText engine; // 현재 소유한 STT 엔진
+        private string micDevice = ""; // 엔진에 넘길 마이크 장치 이름 (빈 문자열이면 기본 장치)
+        private bool lastAvailability; // 마지막으로 알린 사용 가능 여부 (변화 감지용)
+        private bool disposed; // Dispose 호출 여부
 
         public VoiceSpellInputSource(ISpeechToText engine, IEnumerable<IPushToTalkSource> triggers)
         {
